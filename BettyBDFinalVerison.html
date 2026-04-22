@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>Happy Birthday</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:       #07070a;
+      --surface:  #111118;
+      --surface2: #18181f;
+      --rose:     #e8a0b0;
+      --rose-dim: #7a4a57;
+      --rose-glow:rgba(232,160,176,0.15);
+      --cream:    #f5efe8;
+      --muted:    #555560;
+      --border:   rgba(232,160,176,0.12);
+      --border2:  rgba(232,160,176,0.3);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--cream);
+      overflow-x: hidden;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .ambient {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 60% 50% at 80% 20%, rgba(232,160,176,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 15% 75%, rgba(120,90,180,0.05) 0%, transparent 55%);
+    }
+
+    canvas#grain {
+      position: fixed; inset: 0; z-index: 0;
+      pointer-events: none; opacity: 0.025;
+      mix-blend-mode: overlay;
+    }
+
+    .page { position: relative; z-index: 1; }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100dvh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 2rem 1.5rem 5rem; position: relative;
+    }
+
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--rose-glow); border: 1px solid var(--border2);
+      border-radius: 100px; padding: 6px 16px;
+      font-size: 0.7rem; font-weight: 500; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--rose); margin-bottom: 2.5rem;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3.8rem, 14vw, 8rem); font-weight: 400; font-style: italic;
+      line-height: 0.95; color: var(--cream); letter-spacing: -0.02em;
+      margin-bottom: 1.8rem; animation: fadeUp 0.9s 0.15s ease both;
+    }
+
+    .hero h1 .accent { color: var(--rose); font-weight: 700; font-style: normal; display: block; }
+
+    .hero-line {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 1.8rem; animation: fadeUp 1s 0.25s ease both;
+    }
+
+    .hero-line-bar {
+      flex: 1; height: 1px;
+      background: linear-gradient(to right, transparent, var(--rose-dim), transparent);
+    }
+
+    .hero-line span {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: 0.95rem; color: var(--muted); letter-spacing: 0.04em;
+    }
+
+    .hero-sub {
+      font-size: 0.85rem; font-weight: 300; color: var(--muted);
+      letter-spacing: 0.08em; animation: fadeUp 1s 0.35s ease both; max-width: 260px;
+    }
+
+    .scroll-cue {
+      position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      animation: fadeUp 1s 0.7s ease both;
+    }
+
+    .scroll-cue span { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+
+    .scroll-pill { width: 22px; height: 36px; border: 1px solid rgba(232,160,176,0.25); border-radius: 100px; position: relative; }
+
+    .scroll-pill::after {
+      content: ''; position: absolute; top: 5px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 8px; border-radius: 100px; background: var(--rose);
+      animation: scrolldot 2s ease-in-out infinite;
+    }
+
+    @keyframes scrolldot {
+      0%   { opacity: 1; top: 5px; }
+      80%  { opacity: 0; top: 18px; }
+      100% { opacity: 0; top: 18px; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Sections ─── */
+    .section { padding: 5rem 0; border-top: 1px solid var(--border); }
+    .section-inner { max-width: 680px; margin: 0 auto; padding: 0 1.5rem; }
+
+    .section-label { display: flex; align-items: center; gap: 12px; margin-bottom: 2.5rem; }
+    .section-label-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--rose); flex-shrink: 0; }
+    .section-label span { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.28em; text-transform: uppercase; color: var(--rose); }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ─── CAROUSEL ─── */
+    .carousel-outer {
+      position: relative; overflow: hidden; border-radius: 20px;
+      touch-action: pan-y; cursor: grab; user-select: none; background: var(--surface);
+    }
+    .carousel-outer:active { cursor: grabbing; }
+
+    .carousel-track {
+      display: flex; will-change: transform;
+      transition: transform 0.42s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .carousel-track.dragging { transition: none; }
+
+    .carousel-slide {
+      min-width: 100%; aspect-ratio: 4/5; position: relative;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;
+    }
+
+    .carousel-slide img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      pointer-events: none; filter: brightness(0.82);
+    }
+
+    .slide-caption-bar {
+      position: absolute; inset: auto 0 0 0; padding: 3rem 1.5rem 1.5rem;
+      background: linear-gradient(to top, rgba(7,7,10,0.88) 40%, transparent);
+    }
+
+    .slide-caption-bar p {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: 1rem; color: rgba(245,239,232,0.85); line-height: 1.5;
+    }
+
+    .carousel-progress { height: 2px; background: rgba(232,160,176,0.1); position: relative; }
+
+    .carousel-progress-fill {
+      position: absolute; inset: 0 auto 0 0; background: var(--rose);
+      transition: width 0.4s ease; border-radius: 0 2px 2px 0;
+    }
+
+    .swipe-hint { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px 0; }
+    .swipe-hint-left { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+
+    .slide-counter-pill {
+      background: var(--rose-glow); border: 1px solid var(--border2);
+      border-radius: 100px; padding: 3px 12px;
+      font-size: 0.68rem; font-weight: 500; color: var(--rose); letter-spacing: 0.08em;
+    }
+
+    .carousel-dots { display: flex; justify-content: center; gap: 6px; padding: 14px 0 0; }
+
+    .cdot {
+      height: 3px; border-radius: 100px; background: var(--rose-dim);
+      transition: width 0.35s ease, background 0.35s ease; width: 16px; cursor: pointer;
+    }
+    .cdot.active { width: 32px; background: var(--rose); }
+
+    /* ─── MESSAGE ─── */
+    .message-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 2rem 1.8rem; position: relative; overflow: hidden;
+    }
+
+    .message-card::before {
+      content: '\201C'; position: absolute; top: -0.2rem; left: 1rem;
+      font-family: 'Playfair Display', serif; font-size: 8rem;
+      color: rgba(232,160,176,0.06); line-height: 1; pointer-events: none;
+    }
+
+    .message-body {
+      font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 400;
+      font-style: italic; line-height: 1.85; color: rgba(245,239,232,0.72); position: relative;
+    }
+    .message-body em { font-style: normal; color: var(--cream); }
+
+    .message-divider { width: 32px; height: 1px; background: var(--rose-dim); margin: 1.6rem 0; }
+
+    .message-sig {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: 1rem; color: var(--rose); letter-spacing: 0.04em; margin-top: 1.8rem;
+    }
+
+    /* ─── QUIZ ─── */
+    .quiz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
+    .quiz-top { padding: 1.5rem 1.5rem 0; }
+    .quiz-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .quiz-qnum { font-size: 0.65rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+
+    .quiz-score-badge {
+      background: var(--rose-glow); border: 1px solid var(--border2); border-radius: 100px; padding: 4px 14px;
+      font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--rose);
+    }
+
+    .quiz-prog-track { height: 3px; background: rgba(255,255,255,0.04); border-radius: 100px; margin-bottom: 1.5rem; }
+
+    .quiz-prog-fill {
+      height: 100%; background: linear-gradient(90deg, var(--rose-dim), var(--rose));
+      border-radius: 100px; transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .question-text {
+      font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 400;
+      font-style: italic; color: var(--cream); line-height: 1.55; margin-bottom: 1.5rem; min-height: 3.5em;
+    }
+
+    .options-list { display: flex; flex-direction: column; gap: 8px; padding: 0 1.5rem 1.5rem; }
+
+    .option-btn {
+      width: 100%; padding: 0.9rem 1.2rem;
+      border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;
+      background: var(--surface2); color: rgba(245,239,232,0.65);
+      font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 400;
+      text-align: left; cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.15s;
+      display: flex; align-items: center; gap: 10px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .option-btn .opt-letter {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 500; flex-shrink: 0;
+    }
+
+    .option-btn:active:not(:disabled) { transform: scale(0.98); }
+    .option-btn:hover:not(:disabled) { border-color: rgba(232,160,176,0.25); color: var(--cream); background: rgba(232,160,176,0.05); }
+    .option-btn.correct { border-color: rgba(130,200,150,0.5); color: #a8d8b8; background: rgba(100,180,130,0.08); }
+    .option-btn.correct .opt-letter { background: rgba(100,180,130,0.2); border-color: rgba(130,200,150,0.4); }
+    .option-btn.wrong { border-color: rgba(210,100,100,0.4); color: #d4a0a0; background: rgba(200,80,80,0.06); }
+    .option-btn.wrong .opt-letter { background: rgba(200,80,80,0.15); border-color: rgba(210,100,100,0.35); }
+    .option-btn:disabled { cursor: default; }
+
+    .quiz-bottom { padding: 0 1.5rem 1.5rem; }
+
+    .quiz-feedback {
+      font-family: 'Playfair Display', serif; font-size: 0.92rem;
+      font-style: italic; color: var(--rose); min-height: 1.4em; margin-bottom: 1rem;
+    }
+
+    .btn-next {
+      width: 100%; padding: 0.9rem; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #7a4a57, #c9788a); color: #fff;
+      font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; display: none;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-next:active { transform: scale(0.98); opacity: 0.9; }
+
+    .score-screen { display: none; text-align: center; padding: 3.5rem 2rem; }
+
+    .score-ring {
+      width: 110px; height: 110px; border-radius: 50%; border: 2px solid var(--border2);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      margin: 0 auto 1.5rem; background: var(--rose-glow);
+    }
+
+    .score-num { font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 700; color: var(--rose); line-height: 1; }
+    .score-total { font-size: 0.65rem; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; }
+
+    .score-msg {
+      font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.1rem;
+      color: rgba(245,239,232,0.6); line-height: 1.55; margin-bottom: 2rem;
+    }
+
+    .btn-restart {
+      padding: 0.8rem 2.2rem; border: 1px solid var(--border2); border-radius: 100px;
+      background: transparent; color: var(--rose); font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-restart:hover { background: var(--rose-glow); }
+
+    /* ─── FOOTER ─── */
+    footer { text-align: center; padding: 5rem 1.5rem 4rem; border-top: 1px solid var(--border); }
+
+    .footer-main {
+      font-family: 'Playfair Display', serif; font-size: clamp(2rem, 10vw, 4rem);
+      font-style: italic; font-weight: 400; color: rgba(232,160,176,0.22);
+      letter-spacing: 0.02em; margin-bottom: 1rem;
+    }
+
+    .footer-sub { font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+
+    /* ─── MUSIC PLAYER ─── */
+    .music-btn {
+      position: fixed; bottom: 1.8rem; right: 1.5rem; z-index: 999;
+      width: 52px; height: 52px; border-radius: 50%;
+      background: linear-gradient(135deg, #7a4a57, #c9788a);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 24px rgba(200,100,130,0.4);
+      transition: transform 0.2s; -webkit-tap-highlight-color: transparent;
+    }
+    .music-btn:active { transform: scale(0.92); }
+    .music-btn svg { width: 20px; height: 20px; fill: #fff; }
+
+    .music-ripple {
+      position: fixed; bottom: 1.8rem; right: 1.5rem;
+      width: 52px; height: 52px; border-radius: 50%;
+      border: 1.5px solid rgba(200,100,130,0.45);
+      z-index: 998; pointer-events: none;
+      animation: mripple 2.2s ease-out infinite;
+    }
+    .music-ripple.paused { animation-play-state: paused; opacity: 0; }
+
+    @keyframes mripple {
+      0%   { transform: scale(1);   opacity: 0.7; }
+      100% { transform: scale(2.4); opacity: 0; }
+    }
+
+    .music-label {
+      position: fixed; bottom: 2.35rem; right: 5.2rem; z-index: 999;
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: 100px; padding: 5px 14px;
+      font-size: 0.68rem; letter-spacing: 0.06em; color: var(--rose);
+      white-space: nowrap; opacity: 0; transform: translateX(8px);
+      transition: opacity 0.35s, transform 0.35s; pointer-events: none;
+    }
+    .music-label.show { opacity: 1; transform: translateX(0); }
+  </style>
+</head>
+<body>
+
+<div class="ambient"></div>
+<canvas id="grain"></canvas>
+
+<!-- ── MUSIC PLAYER UI ── -->
+<div class="music-ripple paused" id="music-ripple"></div>
+<div class="music-label" id="music-label">🎵 Tap to play music</div>
+<button class="music-btn" onclick="toggleMusic()" aria-label="Toggle music">
+  <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+  <svg id="icon-pause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+</button>
+
+<!-- YouTube iframe loads on first tap -->
+<iframe id="yt-player" src="" allow="autoplay; encrypted-media" frameborder="0"
+  style="display:none;position:fixed;bottom:0;right:0;width:1px;height:1px;"></iframe>
+
+<div class="page">
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero-tag"><span>🌸</span> Kum 25 Cin</div>
+    <h1>Happy<br><span class="accent">Birthday</span></h1>
+    <div class="hero-line">
+      <div class="hero-line-bar"></div>
+      <span>for someone special</span>
+      <div class="hero-line-bar"></div>
+    </div>
+    <p class="hero-sub">To the one who makes everything feel like poetry.</p>
+    <div class="scroll-cue">
+      <span>scroll</span>
+      <div class="scroll-pill"></div>
+    </div>
+  </section>
+
+  <!-- ── SLIDESHOW ── -->
+  <section class="section">
+    <div class="section-inner">
+      <div class="section-label">
+        <div class="section-label-dot"></div>
+        <span>Our moments</span>
+      </div>
+    </div>
+
+    <div class="carousel-outer" id="carousel">
+      <div class="carousel-track" id="carousel-track">
+
+        <div class="carousel-slide">
+          <img src="betty1.jpg" alt="Memory">
+          <div class="slide-caption-bar"><p>Sia Ka pu Suan kong man khai nii taw ka lei khi haha</p></div>
+        </div>
+
+        <div class="carousel-slide">
+          <img src="betty2.jpg" alt="Memory">
+          <div class="slide-caption-bar"><p>Sia ka sung ah pai tan</p></div>
+        </div>
+
+        <div class="carousel-slide">
+          <img src="betty4.jpg" alt="Memory">
+          <div class="slide-caption-bar"><p>Ciang Ciang kung pan ka nga</p></div>
+        </div>
+
+        <div class="carousel-slide">
+          <img src="betty5.jpeg" alt="Memory">
+          <div class="slide-caption-bar"><p>Hoi cip ni ziak sia sung</p></div>
+        </div>
+
+        <div class="carousel-slide">
+          <img src="betty6.jpeg" alt="Memory">
+          <div class="slide-caption-bar"><p>Ciang Ciang na ka u ah ki hoi sak na dei tha le ci te hong piak sia</p></div>
+        </div>
+
+        <div class="carousel-slide">
+          <img src="betty7.jpg" alt="Memory">
+          <div class="slide-caption-bar"><p>Sia ni tak nang zan hak pui thei le te a cing bel ni tak hi tha tu ve</p></div>
+        </div>
+
+        <div class="carousel-slide">
+          <img src="betty8.jpg" alt="Memory">
+          <div class="slide-caption-bar"><p>Sia sung ah na sam style sia taw ki lawm heu hi</p></div>
+        </div>
+
+        <div class="carousel-slide">
+          <img src="betty3.jpeg" alt="Memory">
+          <div class="slide-caption-bar"><p>Sia Photo sia na delete maa kei save man ve ve hehe</p></div>
+        </div>
+
+      </div>
+
+      <div class="carousel-progress">
+        <div class="carousel-progress-fill" id="car-progress"></div>
+      </div>
+    </div>
+
+    <div class="section-inner" style="padding-top:0;">
+      <div class="swipe-hint" style="margin-top:14px;">
+        <span class="swipe-hint-left">← swipe awng na photo na en nuam le →</span>
+        <span class="slide-counter-pill" id="car-counter">1 / 8</span>
+      </div>
+      <div class="carousel-dots" id="car-dots"></div>
+    </div>
+  </section>
+
+  <!-- ── MESSAGE ── -->
+  <section class="section">
+    <div class="section-inner">
+      <div class="section-label">
+        <div class="section-label-dot"></div>
+        <span>A letter</span>
+      </div>
+      <div class="message-card">
+        <div class="message-body">
+          <p>A ma sa bel ah Happy Birthday maw Bet. Kum 25 sung ah thin ngim na le thin kiam na te Topa na laak sak siat taa hen ah na Kum thak sung thupha taw ki dim taa hen.</p>
+          <div class="message-divider"></div>
+          <p>Na mai lam ah na plan te thiam po topa na taang tung sak taa hen.</p>
+          <div class="message-divider"></div>
+          <p><em>Happy birthday. Here is to many more.</em></p>
+        </div>
+        <div class="message-sig">— Dal Muang</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── QUIZ ── -->
+  <section class="section">
+    <div class="section-inner">
+      <div class="section-label">
+        <div class="section-label-dot"></div>
+        <span>A small quiz</span>
+      </div>
+
+      <div class="quiz-card">
+        <div id="quiz-body">
+          <div class="quiz-top">
+            <div class="quiz-meta">
+              <span class="quiz-qnum" id="q-counter">Question 1 of 5</span>
+              <span class="quiz-score-badge" id="score-counter">0 pts</span>
+            </div>
+            <div class="quiz-prog-track">
+              <div class="quiz-prog-fill" id="progress-fill" style="width:20%"></div>
+            </div>
+            <p class="question-text" id="question-text">Loading…</p>
+          </div>
+          <div class="options-list" id="options-grid"></div>
+          <div class="quiz-bottom">
+            <p class="quiz-feedback" id="quiz-feedback"></p>
+            <button class="btn-next" id="btn-next" onclick="nextQuestion()">Continue →</button>
+          </div>
+        </div>
+
+        <div class="score-screen" id="score-screen">
+          <div class="score-ring">
+            <div class="score-num" id="score-display">0</div>
+            <div class="score-total">out of 5</div>
+          </div>
+          <p class="score-msg" id="score-msg"></p>
+          <button class="btn-restart" onclick="restartQuiz()">Play again</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div class="footer-main">always yours.</div>
+    <div class="footer-sub">Happy 25th 🌸</div>
+  </footer>
+
+</div>
+
+<script>
+/* ─── Grain canvas ─── */
+(function(){
+  var c = document.getElementById('grain');
+  var ctx = c.getContext('2d');
+  function resize(){ c.width = window.innerWidth; c.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  function draw(){
+    var img = ctx.createImageData(c.width, c.height);
+    for(var i=0;i<img.data.length;i+=4){
+      var v = Math.random()*255|0;
+      img.data[i]=img.data[i+1]=img.data[i+2]=v; img.data[i+3]=255;
+    }
+    ctx.putImageData(img,0,0);
+    setTimeout(draw,80);
+  }
+  draw();
+})();
+
+/* ─── Swipe Carousel ─── */
+(function(){
+  var track    = document.getElementById('carousel-track');
+  var slides   = track.querySelectorAll('.carousel-slide');
+  var dotsWrap = document.getElementById('car-dots');
+  var counter  = document.getElementById('car-counter');
+  var progress = document.getElementById('car-progress');
+  var total    = slides.length;
+  var current  = 0, startX = 0, diffX = 0, dragging = false;
+
+  slides.forEach(function(_,i){
+    var d = document.createElement('span');
+    d.className = 'cdot' + (i===0?' active':'');
+    d.addEventListener('click', function(){ goTo(i); });
+    dotsWrap.appendChild(d);
+  });
+
+  function update(animate){
+    if(animate !== false) track.classList.remove('dragging');
+    else track.classList.add('dragging');
+    track.style.transform = 'translateX(calc(-'+current+'00% + '+diffX+'px))';
+    dotsWrap.querySelectorAll('.cdot').forEach(function(d,i){ d.classList.toggle('active', i===current); });
+    counter.textContent = (current+1) + ' / ' + total;
+    progress.style.width = (((current+1)/total)*100) + '%';
+  }
+
+  function goTo(n){ current = Math.max(0, Math.min(total-1, n)); diffX = 0; update(true); }
+
+  track.addEventListener('touchstart', function(e){ startX = e.touches[0].clientX; diffX=0; dragging=true; clearInterval(autoT); }, {passive:true});
+  track.addEventListener('touchmove',  function(e){ if(!dragging) return; diffX = e.touches[0].clientX - startX; update(false); }, {passive:true});
+  track.addEventListener('touchend',   function(){
+    dragging = false;
+    var t = window.innerWidth * 0.22;
+    if(diffX < -t) goTo(current+1); else if(diffX > t) goTo(current-1); else { diffX=0; update(true); }
+  }, {passive:true});
+
+  track.addEventListener('mousedown', function(e){ startX=e.clientX; diffX=0; dragging=true; clearInterval(autoT); track.classList.add('dragging'); e.preventDefault(); });
+  window.addEventListener('mousemove', function(e){ if(!dragging) return; diffX = e.clientX - startX; update(false); });
+  window.addEventListener('mouseup', function(){
+    if(!dragging) return; dragging=false;
+    var t = window.innerWidth * 0.18;
+    if(diffX < -t) goTo(current+1); else if(diffX > t) goTo(current-1); else { diffX=0; update(true); }
+  });
+
+  var autoT = setInterval(function(){ if(!dragging) goTo(current+1 >= total ? 0 : current+1); }, 5000);
+  update(true);
+})();
+
+/* ─── Quiz ─── */
+var questions = [
+  { question: "Ii ki mu masa sia bg kum ziam?", options: ["Tan thum summer","Taan li summer","Taan nga summer","Taan ni summer"], answer: 0, fun: "He lai maw" },
+  { question: "Phone ki pau pui a tam nai bang zia?", options: ["Nai 1","Nai 2","Nai 3","Nai 4"], answer: 2, fun: "2021 ngam buai ki pat maa sa lai" },
+  { question: "Kei ma bithday na he le. En ki heak awng?", options: ["27.09.2000","27.10.2000","29.9.2000","23.10.2000"], answer: 2, fun: "Phawk sak lai maw lung dam cip" },
+  { question: "Ni tak ki vak khawm bg za vei ziam", options: ["Khat vei","Thum Vei","Nga Vei","Salii Vei"], answer: 2, fun: "Kham cia le te nang lum pal cip ta na tham vei cip ki vak khawm ngei ngawl" },
+  { question: "Haha tu na ki dawk na sia ii ki it ma sa ni pan tu ni dong bg za vei ki khen hi zia", options: ["Nga Vei","Lii Vei","Luk Vei","Tel nawn ngawl"], answer: 0, fun: "Kei ma heak na nga vei" }
+];
+
+var letters = ['A','B','C','D'];
+var current = 0, score = 0, answered = false;
+
+function loadQuestion(){
+  answered = false;
+  var q = questions[current];
+  document.getElementById('question-text').textContent = q.question;
+  document.getElementById('q-counter').textContent = 'Question '+(current+1)+' of '+questions.length;
+  document.getElementById('progress-fill').style.width = (((current+1)/questions.length)*100)+'%';
+  document.getElementById('score-counter').textContent = score+' pts';
+  document.getElementById('quiz-feedback').textContent = '';
+  document.getElementById('btn-next').style.display = 'none';
+  var grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  q.options.forEach(function(opt,i){
+    var btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = '<span class="opt-letter">'+letters[i]+'</span>' + opt;
+    btn.addEventListener('click', function(){ selectAnswer(i); });
+    grid.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx){
+  if(answered) return;
+  answered = true;
+  var q = questions[current];
+  var btns = document.querySelectorAll('.option-btn');
+  btns.forEach(function(b){ b.disabled = true; });
+  if(idx === q.answer){
+    btns[idx].classList.add('correct'); score++;
+    document.getElementById('quiz-feedback').textContent = '✓ ' + q.fun;
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.answer].classList.add('correct');
+    document.getElementById('quiz-feedback').textContent = 'Ah phi man sia: ' + q.options[q.answer];
+  }
+  document.getElementById('score-counter').textContent = score+' pts';
+  document.getElementById('btn-next').style.display = 'block';
+}
+
+function nextQuestion(){ current++; if(current >= questions.length) showScore(); else loadQuestion(); }
+
+function showScore(){
+  document.getElementById('quiz-body').style.display = 'none';
+  document.getElementById('score-screen').style.display = 'block';
+  document.getElementById('score-display').textContent = score;
+  var pct = score / questions.length;
+  var msg = pct===1   ? "Perfect. You know me better than I know myself." :
+            pct>=0.8  ? "Remarkable. Very close to perfect." :
+            pct>=0.6  ? "Not bad at all. We still have stories to share." :
+            pct>=0.4  ? "We need more evenings like this." :
+                        "Clearly, we need to talk more. I am not complaining.";
+  document.getElementById('score-msg').textContent = msg;
+}
+
+function restartQuiz(){
+  current=0; score=0;
+  document.getElementById('quiz-body').style.display = 'block';
+  document.getElementById('score-screen').style.display = 'none';
+  loadQuestion();
+}
+
+loadQuestion();
+
+/* ─── Music Player ─── */
+// Song: "Can I Be Him" — James Arthur
+var musicPlaying = false;
+var musicStarted = false;
+var labelTimer;
+
+// Show hint on page load
+setTimeout(function(){
+  var lbl = document.getElementById('music-label');
+  lbl.classList.add('show');
+  setTimeout(function(){ lbl.classList.remove('show'); }, 3500);
+}, 1200);
+
+function toggleMusic(){
+  var player = document.getElementById('yt-player');
+  var ripple = document.getElementById('music-ripple');
+  var label  = document.getElementById('music-label');
+  var iPlay  = document.getElementById('icon-play');
+  var iPause = document.getElementById('icon-pause');
+
+  if(!musicStarted){
+    // Load YouTube src only on user tap (required by mobile browsers)
+    player.src = "https://www.youtube.com/embed/DapfD7zyPmQ?https://youtu.be/0yW7w8F2TVA?list=RD0yW7w8F2TVA=1&loop=1&playlist=DapfD7zyPmQ&controls=0&enablejsapi=1";
+    player.style.display = 'block';
+    musicStarted = true;
+    musicPlaying = true;
+  } else {
+    musicPlaying = !musicPlaying;
+    var cmd = musicPlaying
+      ? '{"event":"command","func":"playVideo","args":""}'
+      : '{"event":"command","func":"pauseVideo","args":""}';
+    try { player.contentWindow.postMessage(cmd, '*'); } catch(e){}
+  }
+
+  if(musicPlaying){
+    iPlay.style.display  = 'none';
+    iPause.style.display = 'block';
+    ripple.classList.remove('paused');
+    label.textContent = '🎵 Can I Be Him — James Arthur';
+  } else {
+    iPlay.style.display  = 'block';
+    iPause.style.display = 'none';
+    ripple.classList.add('paused');
+    label.textContent = '⏸ Music paused';
+  }
+
+  clearTimeout(labelTimer);
+  label.classList.add('show');
+  labelTimer = setTimeout(function(){ label.classList.remove('show'); }, 2800);
+}
+</script>
+</body>
+</html>
